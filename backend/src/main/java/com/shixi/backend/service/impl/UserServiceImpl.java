@@ -34,9 +34,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String addUser(String username, String password) {
-        User user = new User(UUID.randomUUID().toString(), username,password,
-                null, 0, "中国", "河南", "郑州", "13333333333",
+    public String addUser(String username, String  password, boolean status, boolean sex,
+                          String country, String provience, String city, String mobel) {
+        User user = new User(UUID.randomUUID().toString(), username, password, status,
+                null, sex, country, provience, city, "13333333333",
                 UUID.randomUUID().toString(), new Date(), new Date());
         userMapper.insert(user);
         return "success";

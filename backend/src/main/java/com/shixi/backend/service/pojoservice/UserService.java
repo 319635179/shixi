@@ -12,5 +12,6 @@ import java.util.List;
 public interface UserService {
     public List<User> getAllUser();
 
-    public String addUser(String username, String  password);
+    public String addUser(String username, String  password, boolean status, boolean sex,
+                          String country, String provience, String city, String mobel);
 }

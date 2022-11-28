@@ -12,7 +12,7 @@ class BackendApplicationTests {
     UserService userService;
     @Test
     void contextLoads() {
-        System.out.println(userService.addUser("wzh", "123456"));
+//        System.out.println(userService.addUser("wzh", "123456"));
     }
 
 }

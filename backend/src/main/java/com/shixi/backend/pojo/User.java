@@ -18,8 +18,9 @@ public class User {
     private String id;
     private String username;
     private String password;
+    private boolean status;
     private String avatarurl;
-    private Integer sex;
+    private boolean sex;
     private String country;
     private String province;
     private String city;
