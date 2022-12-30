@@ -24,4 +24,7 @@ export default {
 * {
   font-family: 'fangZhengHei';
 } */
+* {
+  box-sizing: border-box;
+}
 </style>

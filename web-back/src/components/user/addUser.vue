@@ -20,44 +20,51 @@
             <div>
                 <label for="country">国家</label>
                 <input class="position" name="country" type="text" v-model="country">
-                <label for="provience">省份</label>
-                <input class="position" name="provience" type="text" v-model="provience">
+                <label for="province">省份</label>
+                <input class="position" name="province" type="text" v-model="province">
                 <label for="city">城市</label>
                 <input class="position" name="city" type="text" v-model="city">
             </div>
             <div>
-                <label for="mobel">联系方式</label>
-                <input style="width: calc(100% - 70px)" name="mobel" type="text" v-model="mobel">
+                <label for="mobile">联系方式</label>
+                <input style="width: calc(100% - 70px)" name="mobile" type="text" v-model="mobile">
             </div>
             <div v-if="errorMes !== ''"></div>
             <button @click="submit">提交</button>
+            <button @click="onlyChangeAdd">取消</button>
         </div>
     </div>
 </template>
 
 <script>
 import { ref } from 'vue';
-import $ from 'jquery'
+import $ from 'jquery';
+import { useStore } from 'vuex';
 
 export default {
     name: 'AddUser',
     props: ['changeIsAdd'],
+    emits: ['onlyChangeAdd'],
     setup(_, context) {
-        let username = ref(''), password = ref(''), sex = ref('男'), status = ref('正常'), provience = ref(''),
-            country = ref(''), city = ref(''), mobel = ref(''), errorMes = ref('');
-        const submit = async () => {
+        const store = useStore();
+        let username = ref(''), password = ref(''), sex = ref('男'), status = ref('正常'), province = ref(''),
+            country = ref(''), city = ref(''), mobile = ref(''), errorMes = ref('');
+        const submit = () => {
             $.ajax({
                 url: 'http://localhost:3000/add/user',
                 type: 'post',
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
                 data: {
                     username: username.value,
                     password: password.value,
                     sex: sex.value === '男' ? false : true,
                     status: status.value === '正常' ? false : true,
-                    provience: provience.value,
+                    province: province.value,
                     country: country.value,
                     city: city.value,
-                    mobel: mobel.value,
+                    mobel: mobile.value,
                 },
                 success: (resp) => {
                     console.log(resp);
@@ -65,17 +72,22 @@ export default {
                 }
             })
         }
+
+        const onlyChangeAdd = () => {
+            context.emit("onlyChangeAdd");
+        }
         return {
             username,
             password,
             sex,
             status,
-            provience,
+            province,
             country,
             city,
-            mobel,
+            mobile,
             errorMes,
-            submit
+            submit,
+            onlyChangeAdd
         }
     }
 }
@@ -104,7 +116,7 @@ export default {
 .addMes>button {
     height: 40px;
     border-radius: 20px;
-    width: 100%;
+    width: 50%;
     border: 0;
     background-color: rgb(69, 112, 230);
     color: white;

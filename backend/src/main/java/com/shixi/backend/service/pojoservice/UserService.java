@@ -3,6 +3,7 @@ package com.shixi.backend.service.pojoservice;
 import com.shixi.backend.pojo.User;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 *
@@ -13,5 +14,12 @@ public interface UserService {
     public List<User> getAllUser();
 
     public String addUser(String username, String  password, boolean status, boolean sex,
-                          String country, String provience, String city, String mobel);
+                          String country, String province, String city, String mobile);
+
+    public String modifyUser(String id, String username, boolean status, boolean sex, String country,
+                             String province, String city, String mobile);
+
+    public String modifyUserPassword(String id, String password);
+
+    public Map<String, String> deleteUser(String id);
 }

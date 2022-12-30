@@ -4,22 +4,11 @@
             <button @click="changeIsAdd">新增</button>
             <button>导出</button>
         </div>
-        <AddUser @changeIsAdd="changeIsAdd" class="addUser" v-if="isAdd === 1" />
-        <div class="userTable">
-            <div class="table">
-                <div class="title" v-for="(title, i) in tableTitle"
-                    :style="{ width: tableWidth[i], backgroundColor: 'rgb(44, 108, 160)', borderTop: '1px solid rgb(236, 206, 36)' }"
-                    :key="title.id">{{ title.name }}
-                </div>
-            </div>
-            <div class="table" v-for="(user, i) of tableMes" :key="user.id">
-                <div v-for="(content, j) in user.data"
-                    :style="{ width: tableWidth[j], backgroundColor: i % 2 === 0 ? 'rgb(8, 52, 88)' : 'rgb(44, 108, 160)' }"
-                    :key="content.id">
-                    {{ content.mes }}
-                </div>
-            </div>
-        </div>
+        <AddUser @changeIsAdd="changeIsAdd" @onlyChangeAdd="onlyChangeIsAdd" class="addUser" v-if="isAdd === 1" />
+        <EditUser @changeIsEdit="changeIsEdit" :userMes="data" :nowId="nowId" class="addUser" v-if="isEdit === 1" />
+        <TableMes :tableMes="tableMes" :tableTitle="tableTitle" :tableWidth="tableWidth" @editMes="editMes"
+            @deleteMes="deleteMes" />
+        <TableList @setPage="setPage" @setIndex="setIndex" :index="index" :page="page" :allLen="allLen" />
     </div>
 </template>
 
@@ -27,15 +16,32 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ref } from 'vue';
 import $ from 'jquery'
+import { useStore } from 'vuex';
 import AddUser from './addUser.vue';
+import EditUser from './editUser.vue';
+import TableList from '../tableList.vue';
+import TableMes from '../tableMes.vue';
 
 export default {
     name: 'UserTable',
     components: {
-        AddUser
+        AddUser,
+        EditUser,
+        TableList,
+        TableMes
     },
     setup() {
+        const store = useStore();
         let isAdd = ref(0);
+        let nowId = ref(-1);
+        let isEdit = ref(0);
+        let data = ref({});
+        let allLen = ref(0.0);
+        let index = ref(3.0);
+        let page = ref(1.0);
+        let search = ref('');
+        let pageItem = ref(1);
+        let url = ref('http://localhost:3000/query/user?' + 'index=' + index.value + '&page=' + page.value);
         const tableWidth = [
             '64px', '130px', '64px', '64px', '200px', '140px', '200px', '200px', '400px', '400px'
         ]
@@ -49,17 +55,40 @@ export default {
             { id: uuidv4, name: '创建时间', style: { width: tableWidth[6] } },
             { id: uuidv4, name: '修改时间', style: { width: tableWidth[7] } },
         ])
-
         const tableMes = ref([]);
-        const getUser = () => {
+        const getAllLen = () => {
             $.ajax({
                 url: 'http://localhost:3000/query/user',
                 type: 'get',
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
                 success: (resp) => {
+                    allLen.value = resp.data.length;
+                }
+            })
+        }
+        getAllLen();
+
+        const getUser = () => {
+            tableMes.value = [];
+            $.ajax({
+                url: url.value,
+                type: 'get',
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
+                success: (resp) => {
+                    data.value = resp;
                     for (let i = 0; i < resp.data.length; i++) {
                         const data = resp.data[i];
+                        const userId = resp.data[i].id;
+                        const cT = new Date(data.createTime);
+                        const uT = new Date(data.updateTime);
+                        data.createTime = cT.getFullYear() + '-' + (cT.getMonth() + 1) + '-' + cT.getDate() + ' ' + cT.getHours() + ':' + cT.getMinutes() + ':' + cT.getSeconds();
+                        data.updateTime = uT.getFullYear() + '-' + (uT.getMonth() + 1) + '-' + uT.getDate() + ' ' + uT.getHours() + ':' + uT.getMinutes() + ':' + uT.getSeconds();
                         const auser = [
-                            { id: uuidv4, mes: resp.data.length - i, style: { width: tableWidth[0] } },
+                            { id: uuidv4, mes: resp.data.length - i + (page.value - 1) * index.value, style: { width: tableWidth[0] } },
                             { id: uuidv4, mes: data.username, style: { width: tableWidth[1] } },
                             { id: uuidv4, mes: data.status ? '异常' : '正常', style: { width: tableWidth[2] } },
                             { id: uuidv4, mes: data.sex ? '女' : '男', style: { width: tableWidth[3] } },
@@ -68,24 +97,81 @@ export default {
                             { id: uuidv4, mes: data.createTime, style: { width: tableWidth[6] } },
                             { id: uuidv4, mes: data.updateTime, style: { width: tableWidth[7] } },
                         ]
-                        tableMes.value.unshift({ id: uuidv4, data: auser });
+                        tableMes.value.unshift({ id: uuidv4, userId, data: auser });
                     }
                 }
             })
         }
         getUser();
-
         const changeIsAdd = () => {
-            tableMes.value = [];
             getUser();
             isAdd.value = 1 - isAdd.value;
+            getAllLen();
         }
+
+        const editMes = (i) => {
+            nowId.value = i;
+            isEdit.value = 1 - isEdit.value;
+        }
+
+        const deleteMes = (i) => {
+            $.ajax({
+                url: 'http://localhost:3000/delete/user',
+                type: 'post',
+                headers: {
+                    Authorization: "Bearer " + store.state.user.token,
+                },
+                data: {
+                    id: tableMes.value[i].userId,
+                },
+                success: (resp) => {
+                    console.log(resp);
+                    getUser();
+                }
+            })
+        }
+
+        const onlyChangeIsAdd = () => {
+            isAdd.value = 1 - isAdd.value;
+        }
+
+        const changeIsEdit = () => {
+            isEdit.value = 1 - isEdit.value
+            getUser();
+        }
+
+        const setIndex = (i) => {
+            index.value = i;
+            url.value = 'http://localhost:3000/query/user?' + 'index=' + index.value + '&page=' + page.value;
+            setPage(1);
+        }
+
+        const setPage = (i) => {
+            page.value = i;
+            url.value = 'http://localhost:3000/query/user?' + 'index=' + index.value + '&page=' + page.value;
+            getUser();
+        }
+
         return {
             tableWidth,
             tableTitle,
             tableMes,
             isAdd,
-            changeIsAdd
+            isEdit,
+            nowId,
+            data,
+            allLen,
+            index,
+            page,
+            search,
+            pageItem,
+            changeIsAdd,
+            onlyChangeIsAdd,
+            editMes,
+            changeIsEdit,
+            setIndex,
+            setPage,
+            deleteMes
         }
     }
 }
@@ -117,34 +203,6 @@ export default {
     position: absolute;
     top: 64px;
     left: calc(10%);
-}
-
-.userTable {
-    width: 96%;
-    margin: 12px 2% 0 2%;
-}
-
-.table {
-    color: rgb(253, 149, 30);
-    width: 100%;
-    height: 50px;
-    display: flex;
-    background-color: steelblue;
-    align-items: center;
-    justify-content: center;
-}
-
-.table>div {
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid rgb(236, 206, 36);
-    border-left: 0;
-    border-top: 0;
-}
-
-.table>div:nth-child(1) {
-    border-left: 1px solid rgb(236, 206, 36);
+    z-index: 1;
 }
 </style>

@@ -1,17 +1,17 @@
 <template>
-    <div class="userLogin">
+    <div class="userLogin" v-if="!$store.state.user.is_display">
         <div class="loginItem">
             <form>
                 <div class="loginForm">
                     <label for="username" class="form-label">用户名</label>
-                    <input type="text" class="form-control" id="username" placeholder="请输入用户名">
+                    <input type="text" class="form-control" id="username" v-model="username" placeholder="请输入用户名">
                 </div>
                 <div class="loginForm">
                     <label for="password" class="form-label">密码</label>
-                    <input type="password" class="form-control" id="password" placeholder="请输入密码名">
+                    <input type="password" class="form-control" id="password" v-model="password" placeholder="请输入密码名">
                 </div>
                 <!-- <div class="error_mes" v-if="error_mes !== ''" :style="errorMesStyle">{{ error_mes }}!</div> -->
-                <button type="submit">登录</button>
+                <button type="button" @click="login">登录</button>
             </form>
             <div class="userAgree">登录即代表您同意本网站用户协议
             </div>
@@ -20,14 +20,51 @@
 </template>
 
 <script>
+import router from '@/router';
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+// import $ from 'jquery';
 
 export default {
     name: 'LoginView    ',
     setup() {
+        const store = useStore();
+        let username = ref(''), password = ref('');
+
+        const jwt_token = localStorage.getItem("jwt_token");
+        if (jwt_token) {
+            store.commit("updateToken", jwt_token);
+            store.dispatch("getInfo", {
+                success() {
+                    router.push({ name: 'home' })
+                    store.commit('updateIsDisplay', false);
+                },
+                error: () => {
+                    store.commit('updateIsDisplay', false);
+                }
+            });
+        } else {
+            store.commit('updateIsDisplay', false);
+        }
+
+        const login = () => {
+            store.dispatch("login", {
+                username: username.value,
+                password: password.value,
+                success() {
+                    router.push({ name: 'home' });
+                }
+            })
+        }
+
+        return {
+            username,
+            password,
+            login
+        }
 
     }
 }
-
 </script>
 
 <style scoped>
