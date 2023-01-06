@@ -7,6 +7,7 @@ import MyMes from '@/views/myMes.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
 import orderVue from '@/views/order.vue'
+import OrderMesVUe from '@/views/ordermes.vue'
 
 const routes = [
   {
@@ -55,6 +56,13 @@ const routes = [
     path: '/order',
     name: 'order',
     component: orderVue,
+    meta: {
+      isAgree: true,
+    }
+  },{
+    path: '/ordermes',
+    name: 'ordermes',
+    component: OrderMesVUe,
     meta: {
       isAgree: true,
     }

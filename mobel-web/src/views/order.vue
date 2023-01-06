@@ -180,8 +180,10 @@ export default {
                     goodsIds,
                 },
                 success: resp => {
-                    if (resp.error_message === 'success')
-                        router.push({ name: 'myMes' });
+                    if (resp.error_message === 'success') {
+                        store.commit('updateOrderId', resp.order_id);
+                        router.push({ name: 'ordermes' });
+                    }
                 }
             })
         }

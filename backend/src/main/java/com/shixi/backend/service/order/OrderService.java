@@ -12,6 +12,8 @@ public interface OrderService {
 
     Map<String, String> addOrder(Map<String, String> data);
 
+    Orders getOrderById(String id);
+
     Map<String, String> modifyOrder(Map<String, String> data);
 
     Map<String, String> deleteOrder(Map<String, String> data);

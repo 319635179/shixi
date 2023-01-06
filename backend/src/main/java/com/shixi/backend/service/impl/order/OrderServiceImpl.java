@@ -85,9 +85,10 @@ public class OrderServiceImpl implements OrderService {
         }
         boolean isSite = Objects.equals(data.get("isSite"), "1");
 
+        String id = UUID.randomUUID().toString();
         Date date = new Date();
         Orders orders = new Orders();
-        orders.setId(UUID.randomUUID().toString());
+        orders.setId(id);
         orders.setOrderId(UUID.randomUUID().toString());
         orders.setAmountPayable(amountPayable);
         orders.setActuallyPayable(actuallyPayable);
@@ -131,7 +132,14 @@ public class OrderServiceImpl implements OrderService {
         ordersMapper.insert(orders);
 
         map.put("error_message", "success");
+        map.put("order_id", id);
         return map;
+    }
+
+    @Override
+    public Orders getOrderById(String id) {
+        Orders orders = ordersMapper.selectById(id);
+        return orders;
     }
 
     @Override

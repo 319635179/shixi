@@ -26,6 +26,11 @@ public class OrderController {
         return orderService.getOrderByUserId(userId);
     }
 
+    @GetMapping("/query/order/id")
+    public Orders getOrderById(String id){
+        return orderService.getOrderById(id);
+    }
+
     @PostMapping("/add/order")
     public Map<String, String> addOrder(@RequestParam Map<String, String> data){
         return orderService.addOrder(data);
