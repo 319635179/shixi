@@ -2,7 +2,6 @@ package com.shixi.backend.service.impl.shop;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.shixi.backend.mapper.ShopMapper;
-import com.shixi.backend.pojo.Goods;
 import com.shixi.backend.pojo.Shop;
 import com.shixi.backend.service.shop.ShopService;
 import org.springframework.beans.factory.annotation.Autowired;

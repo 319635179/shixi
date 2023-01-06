@@ -29,6 +29,13 @@ public class ShoppingbagServiceImpl implements ShoppingbagService {
     }
 
     @Override
+    public Integer getGoodsNumByUserIdAndGoodsId(String userId, String goodsId) {
+        QueryWrapper<Shoppingbag> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId).eq("goodsId", goodsId);
+        return shoppingbagMapper.selectOne(queryWrapper).getGoodsNum();
+    }
+
+    @Override
     public Map<String, String> addShoppingbag(Map<String, String> data) {
         Map<String, String> map = new HashMap<>();
         String userId = data.get("userId");
@@ -81,5 +88,16 @@ public class ShoppingbagServiceImpl implements ShoppingbagService {
         shoppingbagMapper.deleteById(id);
         map.put("error_message", "success");
         return map;
+    }
+
+    @Override
+    public String getShoppingbagIdByUserIdAndGoodsId(String userId, String goodsId) {
+        QueryWrapper<Shoppingbag> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId).eq("goodsId", goodsId);
+        Shoppingbag shoppingbag = shoppingbagMapper.selectOne(queryWrapper);
+        if(shoppingbag != null){
+            return shoppingbag.getId();
+        }
+        return null;
     }
 }

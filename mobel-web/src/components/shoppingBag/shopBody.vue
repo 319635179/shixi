@@ -3,8 +3,13 @@
         <div v-for="(shop, i) in shoppingBagMes" :key="shop.id" class="shopBody">
             <div class="shopBody-Title">
                 <div style="width: 10vw; height: 5vh; display: flex; justify-content: center; align-items: center;">
-                    <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;"
-                        :style="buttonStyle[i].style" @click="clickButton('shop', i, 0)"></div>
+                    <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;
+                         display: flex; justify-content: center; align-items: center; color: white;"
+                        :style="buttonStyle[i].style" @click="clickButton('shop', i, 0)">
+                        <el-icon style=" transform: scale(0.8);">
+                            <Check />
+                        </el-icon>
+                    </div>
                 </div>
                 <div>
                     {{ shop.shopName }}
@@ -15,8 +20,13 @@
             <div v-for="(goods, j) in shop.data" :key="goods.id" class="goods">
                 <div style="height: 15vh; display: flex; align-items: center;">
                     <div style="width: 10vw; height: 5vh; display: flex; justify-content: center; align-items: center;">
-                        <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;"
-                            :style="buttonStyle[i].data[j].style" @click="clickButton('goods', i, j)"></div>
+                        <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;
+                         display: flex; justify-content: center; align-items: center; color: white;"
+                            :style="buttonStyle[i].data[j].style" @click="clickButton('goods', i, j)">
+                            <el-icon style=" transform: scale(0.8);">
+                                <Check />
+                            </el-icon>
+                        </div>
                     </div>
                 </div>
                 <img style="height: 15vh; width: 15vh;" :src="'http://localhost:3000' + goods.goodsMes.photoUrl" alt="">
@@ -40,14 +50,18 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
     <div class="shopBottum">
         <div class="leftSelect">
             <div style="width: 10vw; height: 5vh; display: flex; justify-content: center; align-items: center;">
-                <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;"
-                    :style="AllSelectStyle.style" @click="clickButton('all', 0, 0)"></div>
+                <div style="width: 2.5vh; height: 2.5vh; border-radius: 50%; border: 1px solid chocolate;
+                         display: flex; justify-content: center; align-items: center; color: white;"
+                    :style="AllSelectStyle.style" @click="clickButton('all', 0, 0)">
+                    <el-icon style=" transform: scale(0.8);">
+                        <Check />
+                    </el-icon>
+                </div>
             </div>
             <div>全选</div>
         </div>
@@ -56,7 +70,7 @@
                 <div class="gongji">共计:</div>
                 <div style="color: red;">￥{{ price }}</div>
             </div>
-            <button type="button">结算</button>
+            <button type="button" @click="goOrder">结算</button>
         </div>
     </div>
 </template>
@@ -66,6 +80,7 @@ import { useStore } from 'vuex';
 import $ from 'jquery';
 import { ref } from 'vue';
 import { computed } from 'vue';
+import router from '@/router';
 
 export default {
     name: "ShopBody",
@@ -83,11 +98,11 @@ export default {
             for (let i = 0; i < buttonStyle.value.length; i++) {
                 for (let j = 0; j < buttonStyle.value[i].data.length; j++) {
                     if (buttonStyle.value[i].data[j].is_select) {
-                        num += parseFloat(shoppingBagMes.value[i].data[j].goodsMes.price) * 100;
+                        num += parseFloat(shoppingBagMes.value[i].data[j].goodsMes.price * shoppingBagMes.value[i].data[j].goodsNum);
                     }
                 }
             }
-            return num / 100;
+            return num.toFixed(2);
         })
 
         const cmp = (a, b) => {
@@ -95,6 +110,7 @@ export default {
                 return 1;
             return -1;
         };
+        store.commit('removeSelectsId');
         let shoppingBagMes = ref([]);
         const getShoppingBag = () => {
             $.ajax({
@@ -173,10 +189,11 @@ export default {
                 for (let k = 1; k < buttonStyle.value[i].data.length; k++) {
                     if (buttonStyle.value[i].data[k].is_select !== buttonStyle.value[i].data[k - 1].is_select) isAll = false;
                 }
-                if (isAll === !buttonStyle.value[i].is_select) {
+                if (isAll === true)
                     buttonStyle.value[i].is_select = buttonStyle.value[i].data[j].is_select;
-                    buttonStyle.value[i].style.backgroundColor = buttonStyle.value[i].is_select ? 'chocolate' : 'white';
-                }
+                else
+                    buttonStyle.value[i].is_select = false;
+                buttonStyle.value[i].style.backgroundColor = buttonStyle.value[i].is_select ? 'chocolate' : 'white';
             } else if (type === 'all') {
                 AllSelectStyle.value.is_select = !AllSelectStyle.value.is_select;
                 AllSelectStyle.value.style.backgroundColor = AllSelectStyle.value.is_select ? 'chocolate' : 'white';
@@ -204,10 +221,11 @@ export default {
                         }
                     }
                 }
-                if (is_selectAll !== AllSelectStyle.value.is_select) {
-                    AllSelectStyle.value.is_select = !AllSelectStyle.value.is_select;
-                    AllSelectStyle.value.style.backgroundColor = AllSelectStyle.value.is_select ? 'chocolate' : 'white';
-                }
+                if (is_selectAll === true)
+                    AllSelectStyle.value.is_select = select;
+                else
+                    AllSelectStyle.value.is_select = false;
+                AllSelectStyle.value.style.backgroundColor = AllSelectStyle.value.is_select ? 'chocolate' : 'white';
             }
         }
 
@@ -231,6 +249,18 @@ export default {
             })
         }
 
+        const goOrder = () => {
+            for (let i = 0; i < buttonStyle.value.length; i++) {
+                for (let j = 0; j < buttonStyle.value[i].data.length; j++) {
+                    if (buttonStyle.value[i].data[j].is_select) {
+                        store.commit('addSelectsId', shoppingBagMes.value[i].data[j]);
+                    }
+                }
+            }
+            store.commit("updateIsHome", false);
+            router.push({ name: 'order' });
+        }
+
         return {
             buttonStyle,
             is_search,
@@ -239,6 +269,7 @@ export default {
             price,
             clickButton,
             changeNum,
+            goOrder,
         };
     },
     components: {}
@@ -326,6 +357,7 @@ export default {
 
 .rightMes>div {
     display: flex;
+    padding: 0 10px;
 }
 
 .rightMes>div>.gongji {

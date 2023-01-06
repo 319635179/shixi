@@ -22,10 +22,6 @@ export default {
         let is_select = toRefs(props).is_select.value;
         let selectMes = toRefs(props).selectMes.value;
 
-        // if (selectMes.type === 'shop') {
-        //     console.log(selectMes.data);
-        // }
-        console.log(selectMes);
 
         const clickButton = () => {
             if (is_select === false) {
@@ -35,7 +31,6 @@ export default {
                     store.commit('addSelectsId', selectMes.data);
                 } else if (selectMes.type === 'shop') {
                     for (let i = 0; i < selectMes.data.length; i++) {
-                        // console.log(selectMes.data[i].id);
                         store.commit('addSelectsId', selectMes.data[i].id);
                     }
                 } else if (selectMes.type === 'all') {

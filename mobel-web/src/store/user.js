@@ -25,7 +25,6 @@ export default {
   },
   actions: {
     login(context, data){
-        console.log('login');
         $.ajax({
             url: 'http://localhost:3000/user/login',
             type: 'post',
@@ -34,7 +33,6 @@ export default {
                 password: data.password,
             },
             success: resp => {
-                console.log(resp);
                 if(resp.error_message === 'success'){
                     localStorage.setItem('jwt_token', resp.token);
                     context.commit('updateToken', resp.token);
